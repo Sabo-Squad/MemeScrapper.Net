@@ -1,0 +1,15 @@
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\bin\Debug\MemeScrapper.exe.config
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\bin\Debug\MemeScrapper.exe
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\bin\Debug\MemeScrapper.pdb
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\bin\Debug\AngleSharp.dll
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\bin\Debug\System.Text.Encoding.CodePages.dll
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\bin\Debug\AngleSharp.xml
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\bin\Debug\System.Runtime.CompilerServices.Unsafe.xml
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\obj\Debug\MemeScrapper.csprojAssemblyReference.cache
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\obj\Debug\MemeScrapper.Form1.resources
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\obj\Debug\MemeScrapper.Properties.Resources.resources
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\obj\Debug\MemeScrapper.csproj.GenerateResource.cache
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\obj\Debug\MemeScrapper.csproj.CopyComplete
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\obj\Debug\MemeScrapper.exe
+C:\Users\Craigy\Development\MemeScrapper\MemeScrapper\obj\Debug\MemeScrapper.pdb

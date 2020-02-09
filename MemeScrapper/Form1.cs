@@ -1,6 +1,9 @@
-﻿using System;
+﻿using AngleSharp;
+using AngleSharp.Dom;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -28,18 +31,31 @@ namespace MemeScrapper
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_click(object sender, EventArgs e)
         {
             string outputPath = textBox1.Text;
 
             if (Directory.Exists(outputPath))
             {
-                //TODO SCRAPE
+
+                IConfiguration config = AngleSharp.Configuration.Default.WithDefaultLoader();
+                string address = GetAppSettings("url");
+                IBrowsingContext context = BrowsingContext.New(config);
+                IDocument document = await context.OpenAsync(address);
+
+                using (StreamWriter sw = new StreamWriter(outputPath + @"\MemeHtml.txt", true))
+                {
+                    sw.Write(document.DocumentElement.OuterHtml);
+                }
             } else
             {
                 MessageBox.Show("Please enter a valid path and try again.", "Invalid Path",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+        public string GetAppSettings(string key)
+        {
+            return ConfigurationManager.AppSettings[key];
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static MemeScrapper.Helper; 
@@ -38,38 +39,56 @@ namespace MemeScrapper
 
             if (Directory.Exists(outputPath))
             {
+                List<Meme> memes = new List<Meme>();
+                string address = GetAppSettings("url");
+                //setup for scraper
+                IConfiguration config = AngleSharp.Configuration.Default.WithDefaultLoader();
+                IBrowsingContext context = BrowsingContext.New(config);
+
                 //Getting the largest page number as memes are paginated
-                int maxPages = await GetMaxPagesFromParentHTML();
+                int maxPage = await GetMaxPagesFromParentHTML(address, context);
 
-                Console.WriteLine(maxPages);
-
-            } else
+                for (int i = 1; i <= maxPage; i++)
+                {
+                    //get memes
+                    address = GetAppSettings("url") + "/page/" + i;
+                    IDocument document = await context.OpenAsync(address);
+                    foreach(IElement element in document.All.Where(x => x.LocalName == "img" && x.ParentElement.GetAttribute("class") == "photo"))
+                     {
+                        memes.Add(new Meme
+                        {
+                            Name = element.GetAttribute("title"),
+                            URL = element.GetAttribute("src")
+                        });
+                        Console.WriteLine(element.GetAttribute("title"));
+                        //Thread.Sleep(2000);
+                    }
+                }
+            }
+            else
             {
                 MessageBox.Show("Please enter a valid path and try again.", "Invalid Path",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        
-        public async Task<int> GetMaxPagesFromParentHTML()
-        {
-            List<int> pageNums = new List<int>();
 
-            IConfiguration config = AngleSharp.Configuration.Default.WithDefaultLoader();
-            string address = GetAppSettings("url");
-            IBrowsingContext context = BrowsingContext.New(config);
+        public async Task<int> GetMaxPagesFromParentHTML(string address, IBrowsingContext context)
+        {
+            int maxPage = 0;
+
             IDocument document = await context.OpenAsync(address);
 
             //Getting each a tag under div of class pagination
             foreach (IElement element in document.All.Where(x => x.LocalName == "a" && x.ParentElement.ClassList.Contains("pagination")))
             {
                 int number;
-                //if the innerhtml(pagenumber) is parsable, add it to a list.
+                //if the innerhtml(pagenumber) is parsable, compare it to maxPage and assign if greater
                 if (int.TryParse(element.InnerHtml, out number))
-                    pageNums.Add(int.Parse(element.InnerHtml));
+                    maxPage = maxPage > number ? maxPage : number;
             }
 
             //returning the largest number (last page)
-            return pageNums.Max();
+            return maxPage;
         }
     }
 }

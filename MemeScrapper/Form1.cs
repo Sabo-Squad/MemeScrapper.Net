@@ -48,20 +48,32 @@ namespace MemeScrapper
                 //Getting the largest page number as memes are paginated
                 int maxPage = await GetMaxPagesFromParentHTML(address, context);
 
-                for (int i = 1; i <= maxPage; i++)
+                for (int i = 1; i <= 2; i++)
                 {
-                    //get memes
+                    //Looping through each page of memes, getting the URL for each meme and then accessing that url to get data on an individual meme and creating an object for it
                     address = GetAppSettings("url") + "/page/" + i;
                     IDocument document = await context.OpenAsync(address);
-                    foreach(IElement element in document.All.Where(x => x.LocalName == "img" && x.ParentElement.GetAttribute("class") == "photo"))
+                    foreach(IElement element in document.All.Where(x => x.LocalName == "a" && x.GetAttribute("class") == "photo"))
                      {
+                        //Getting the URL for the individual meme
+                        string memeUrl = GetAppSettings("url").Replace(@"/memes", "") + element.GetAttribute("href");
+                        IDocument memeDocument = await context.OpenAsync(memeUrl);
+
+                        List<string> tagsList = new List<string>();
+
+                        foreach(IElement ele in memeDocument.All.Where(x => x.LocalName == "a" && x.ParentElement.LocalName == "dd" && x.ParentElement.ParentElement.Id == "entry_tags"))
+                        {
+                            tagsList.Add(ele.InnerHtml);
+                        }
+                        //Creating a meme
                         memes.Add(new Meme
                         {
-                            Name = element.GetAttribute("title"),
-                            URL = element.GetAttribute("src")
+                            Name = memeDocument.QuerySelectorAll("a").FirstOrDefault(x => x.ParentElement.ParentElement.ClassName == "info wide").InnerHtml,
+                            URL = memeUrl,
+                            Views = int.Parse(memeDocument.QuerySelectorAll("a").FirstOrDefault(x => x.ParentElement.ClassName == "views").InnerHtml.Replace(",", "")),
+                            Tags = tagsList.ToArray()
                         });
-                        Console.WriteLine(element.GetAttribute("title"));
-                        //Thread.Sleep(2000);
+                        Thread.Sleep(2000);
                     }
                 }
             }

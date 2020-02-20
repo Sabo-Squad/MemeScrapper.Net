@@ -12,5 +12,11 @@ namespace MemeScrapper
         public string Name { get; set; }
         public int Views { get; set; }
         public string[] Tags { get; set; }
+        public byte[] ImageByteArray { get; set; }
+
+        public override string ToString()
+        {
+            return "URL: " + URL + "\nName: " + Name + "\nViews: " + Views + "\nTags " + Tags + "\nImageByeArray " + ImageByteArray;
+        }
     }
 }

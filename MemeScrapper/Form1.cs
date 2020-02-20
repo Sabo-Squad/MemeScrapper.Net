@@ -8,6 +8,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,6 +40,7 @@ namespace MemeScrapper
 
             if (Directory.Exists(outputPath))
             {
+               
                 List<Meme> memes = new List<Meme>();
                 string address = GetAppSettings("url");
                 //setup for scraper
@@ -55,25 +57,43 @@ namespace MemeScrapper
                     IDocument document = await context.OpenAsync(address);
                     foreach(IElement element in document.All.Where(x => x.LocalName == "a" && x.GetAttribute("class") == "photo"))
                      {
-                        //Getting the URL for the individual meme
-                        string memeUrl = GetAppSettings("url").Replace(@"/memes", "") + element.GetAttribute("href");
-                        IDocument memeDocument = await context.OpenAsync(memeUrl);
-
-                        List<string> tagsList = new List<string>();
-
-                        foreach(IElement ele in memeDocument.All.Where(x => x.LocalName == "a" && x.ParentElement.LocalName == "dd" && x.ParentElement.ParentElement.Id == "entry_tags"))
+                        try
                         {
-                            tagsList.Add(ele.InnerHtml);
+                            byte[] imageBytes;
+                            List<string> tagsList = new List<string>();
+                            //Getting the URL for the individual meme
+                            string memeUrl = GetAppSettings("url").Replace(@"/memes", "") + element.GetAttribute("href");
+                            IDocument memeDocument = await context.OpenAsync(memeUrl);
+
+                            foreach (IElement ele in memeDocument.All.Where(x => x.LocalName == "a" && x.ParentElement.LocalName == "dd" && x.ParentElement.ParentElement.Id == "entry_tags"))
+                            {
+                                tagsList.Add(ele.InnerHtml);
+                            }
+
+                            //Getting the bytearray of the meme image to be stored in the object
+                            using (WebClient webClient = new WebClient())
+                            {
+                                imageBytes = webClient.DownloadData(memeDocument.QuerySelectorAll("img").FirstOrDefault(x => x.ParentElement.ClassName == "photo left wide"
+                                && x.ParentElement.ParentElement.LocalName == "header").GetAttribute("data-src"));
+                            }
+                            //Creating a meme
+                            //This will be replaced by adding the meme to a database instead of just to a list.
+                            memes.Add(new Meme
+                            {
+                                Name = memeDocument.QuerySelectorAll("a").FirstOrDefault(x => x.ParentElement.ParentElement.ClassName == "info wide").InnerHtml,
+                                URL = memeUrl,
+                                Views = int.Parse(memeDocument.QuerySelectorAll("a").FirstOrDefault(x => x.ParentElement.ClassName == "views").InnerHtml.Replace(",", "")),
+                                Tags = tagsList.ToArray(),
+                                ImageByteArray = imageBytes
+                            });
+                            Console.WriteLine(memes.LastOrDefault().ToString());
+                            Thread.Sleep(5000);
                         }
-                        //Creating a meme
-                        memes.Add(new Meme
+                        catch (Exception ex)
                         {
-                            Name = memeDocument.QuerySelectorAll("a").FirstOrDefault(x => x.ParentElement.ParentElement.ClassName == "info wide").InnerHtml,
-                            URL = memeUrl,
-                            Views = int.Parse(memeDocument.QuerySelectorAll("a").FirstOrDefault(x => x.ParentElement.ClassName == "views").InnerHtml.Replace(",", "")),
-                            Tags = tagsList.ToArray()
-                        });
-                        Thread.Sleep(2000);
+                            Console.WriteLine("Ran into an error " + ex);
+                        }
+                        
                     }
                 }
             }
